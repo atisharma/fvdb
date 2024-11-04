@@ -20,3 +20,5 @@ tags.temp
 
 *.toml
 traceback.log
+publish.sh
+dist/

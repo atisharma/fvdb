@@ -1,8 +1,8 @@
 "
-vdb - A vector database API.
+fvdb - A vector database API.
 
 This package provides an API for interacting with a vector database
-(vdb) stored in-memory using Faiss and a list of dicts and for using
+(fvdb) stored in-memory using Faiss and a list of dicts and for using
 Faiss and pickle for serialization.
 
 Command-line utilities are provided for creating, modifying, and searching the
@@ -14,19 +14,19 @@ vector database.
 (import toolz.dicttoolz [keyfilter])
 (import json [dumps])
 
-(import vdb.config)
+(import fvdb.config)
 
 
-(setv default-path (:path vdb.config.cfg))
+(setv default-path (:path fvdb.config.cfg))
 
 
 (defn [(click.group)]
       cli [])
 
 (defn [(click.command)
-       (click.option "-p" "--path" :default default-path :help "Specify a vdb path.")]
+       (click.option "-p" "--path" :default default-path :help "Specify a fvdb path.")]
   info [path]
-  (import vdb.db [faiss info])
+  (import fvdb.db [faiss info])
   (let [v (faiss path)]
     (click.echo
       (tabulate (.items (info v))))))
@@ -35,9 +35,9 @@ vector database.
 
 
 (defn [(click.command)
-       (click.option "-p" "--path" :default default-path :help "Specify a vdb path.")]
+       (click.option "-p" "--path" :default default-path :help "Specify a fvdb path.")]
   nuke [path]
-  (import vdb.db [faiss nuke])
+  (import fvdb.db [faiss nuke])
   (let [v (faiss path)]
     (nuke v)))
 
@@ -45,9 +45,9 @@ vector database.
 
   
 (defn [(click.command)
-       (click.option "-p" "--path" :default default-path :help "Specify a vdb path.")]
+       (click.option "-p" "--path" :default default-path :help "Specify a fvdb path.")]
   sources [path]
-  (import vdb.db [faiss sources])
+  (import fvdb.db [faiss sources])
   (let [v (faiss path)]
     (for [source (sorted (sources v))]
       (click.echo source))))
@@ -56,10 +56,10 @@ vector database.
 
   
 (defn [(click.command)
-       (click.option "-p" "--path" :default default-path :help "Specify a vdb path.")
+       (click.option "-p" "--path" :default default-path :help "Specify a fvdb path.")
        (click.argument "file_or_directory")]
   ingest [path file-or-directory]
-  (import vdb.db [faiss ingest write])
+  (import fvdb.db [faiss ingest write])
   (let [v (faiss path)
         records (ingest v file-or-directory)
         n-records (:n-records-added records)]
@@ -70,12 +70,12 @@ vector database.
   
 
 (defn [(click.command)
-       (click.option "-p" "--path" :default default-path :help "Specify a vdb path.")
+       (click.option "-p" "--path" :default default-path :help "Specify a fvdb path.")
        (click.option "-r" "--top" :default 6 :type int :help "Return just top n results.")
        (click.option "-j" "--json" :is-flag True :default False :help "Return results as a json string")
        (click.argument "query")]
   similar [path query * top json]
-  (import vdb.db [faiss similar])
+  (import fvdb.db [faiss similar])
   (let [v (faiss path)
         results (similar v query :top top)
         keys ["score" "source" "page" "length" "added"]]

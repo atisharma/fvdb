@@ -1,11 +1,11 @@
-# vdb - thin porcelain around FAISS
+# fvdb - thin porcelain around FAISS
 
-`vdb` is a simple, minimal wrapper around the FAISS vector database.
+`fvdb` is a simple, minimal wrapper around the FAISS vector database.
 It uses a L2 index with normalised vectors.
 
 It uses the `faiss-cpu` package and `sentence-transformers` for embeddings.
 If you need the GPU version of FAISS (very probably not), you can just manually
-install `faiss-gpu` and use `GPUIndexFlatL2` instead of `IndexFlatL2` in `vdb/db.hy`.
+install `faiss-gpu` and use `GPUIndexFlatL2` instead of `IndexFlatL2` in `fvdb/db.hy`.
 
 
 ## Features
@@ -22,52 +22,52 @@ You should one of the many available packages for that (unstructured, trafiltura
 ## Usage
 
 ```python
-import hy # vdb is written in Hy, but you can use it from python too
-from vdb import faiss, ingest, similarity, sources, write
+import hy # fvdb is written in Hy, but you can use it from python too
+from fvdb import faiss, ingest, similar, sources, write
 
 # data ingestion
 v = faiss()
-vdb.ingest(v, "docs.md")
-vdb.ingest(v, "docs-dir")
-vdb.write(v, "/tmp/test.vdb") # defaults to $XDG_DATA_HOME/vdb (~/.local/share/vdb/ on Linux)
+ingest(v, "docs.md")
+ingest(v, "docs-dir")
+write(v, "/tmp/test.fvdb") # defaults to $XDG_DATA_HOME/fvdb (~/.local/share/fvdb/ on Linux)
 
 # search
-vdb.similarity(v, "some query text")
-vdb.marginal(v, "some query text") # not yet implemented
+similar(v, "some query text")
+marginal(v, "some query text") # not yet implemented
 
 # information, management
-vdb.sources(v)
-vdb.info(v)
-vdb.nuke(v)
+sources(v)
+info(v)
+nuke(v)
 ```
 
 ```bash
-$ # defaults to $XDG_DATA_HOME/vdb (~/.local/share/vdb/ on Linux)
+$ # defaults to $XDG_DATA_HOME/fvdb (~/.local/share/fvdb/ on Linux)
 # data ingestion (saves on exit)
-$ vdb ingest doc.md
-$ vdb ingest docs-dir
+$ fvdb ingest doc.md
+$ fvdb ingest docs-dir
 
 $ # search
-$ vdb similarity "some query text"        # default to json output
-$ vdb similarity -t "some query text" # --table / -t gives tabulated output
-$ vdb marginal "some query text" # not yet implemented
+$ fvdb similarity "some query text"        # default to json output
+$ fvdb similarity -t "some query text" # --table / -t gives tabulated output
+$ fvdb marginal "some query text" # not yet implemented
 
 $ # information, management
-$ vdb sources
-$ vdb info
-$ vdb nuke
+$ fvdb sources
+$ fvdb info
+$ fvdb nuke
 ```
 
 ### Configuration
 
-Looks for `$XDG_CONFIG_HOME/vdb/conf.toml`, otherwise uses defaults.
+Looks for `$XDG_CONFIG_HOME/fvdb/conf.toml`, otherwise uses defaults.
 
 Here is an example.
 
 ```toml
-path = "/tmp/test.vdb"
+path = "/tmp/test.fvdb"
 
-# You cannot mix embeddings models in a single vdb
+# You cannot mix embeddings models in a single fvdb
 embeddings.model = "all-mpnet-base-v2" # conservative default
 
 # some models need extra options
@@ -80,10 +80,10 @@ embeddings.model = "all-mpnet-base-v2" # conservative default
 
 First [install pytorch](https://pytorch.org/get-started/locally/), which is used by `sentence-transformers`.
 You must decide if you want the CPU or CUDA (nvidia GPU) version of pytorch.
-For just text embeddings for `vdb`, CPU is sufficient.
+For just text embeddings for `fvdb`, CPU is sufficient.
 
 Then,
 ```bash
-pip install vdb
+pip install fvdb
 ```
 and that's it.

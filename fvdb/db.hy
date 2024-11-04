@@ -2,7 +2,7 @@
 A vector database API.
 
 This module provides an API for interacting with a vector database
-(vdb) stored in-memory using Faiss and a list of dicts and using
+(fvdb) stored in-memory using Faiss and a list of dicts and using
 Faiss and pickle for serialization.
 
 Functions are provided for creating, modifying, and searching the
@@ -15,8 +15,8 @@ Limited validation and integrity checks may be performed using the
 `validate` function, which currently only ensures the number of
 records and embeddings match.
 
-Because the vdb is in-memory, and no locks are implemented, this
-module is probably not thread-safe. Modify the vdb only from the main
+Because the fvdb is in-memory, and no locks are implemented, this
+module is probably not thread-safe. Modify the fvdb only from the main
 thread. Other threads will have to reload the state after modification.
 "
 
@@ -41,9 +41,9 @@ thread. Other threads will have to reload the state after modification.
 
 (import faiss [IndexFlatL2 IndexFlatIP read-index write-index normalize-L2])
 
-(import vdb.config [cfg])
-(import vdb.embeddings [embed embedding-model-name])
-(import vdb.split [split chunk-markdown])
+(import fvdb.config [cfg])
+(import fvdb.embeddings [embed embedding-model-name])
+(import fvdb.split [split chunk-markdown])
 
 
 ;; * Functions to create, persist or destroy the vector database
@@ -80,51 +80,51 @@ thread. Other threads will have to reload the state after modification.
        "path" path
        "dirty" False})))
 
-(defn write [#^ dict vdb * [path None]]
+(defn write [#^ dict fvdb * [path None]]
   "Write the vector and document indices to disk."
   ;; TODO rebalance / optimize index before saving
-  (let [path (Path (or path (:path vdb)) embedding-model-name)]
+  (let [path (Path (or path (:path fvdb)) embedding-model-name)]
     (mkdir path)
     (if (.is-dir path)
         (do
-          (write-index (:vectors vdb) (str (Path path "vector_index.faiss")))
-          (psave (:records vdb) (Path path "records.pkl")))
-        (raise (FileNotFoundError f"Writing vdb to path {(:path vdb)} failed - is it a directory?")))))
+          (write-index (:vectors fvdb) (str (Path path "vector_index.faiss")))
+          (psave (:records fvdb) (Path path "records.pkl")))
+        (raise (FileNotFoundError f"Writing fvdb to path {(:path fvdb)} failed - is it a directory?")))))
 
-(defn nuke [#^ dict vdb]
+(defn nuke [#^ dict fvdb]
   "Remove all records (in-place) from the vector index and records."
-  (.clear (:records vdb))
-  (.reset (:vectors vdb))
-  (assoc vdb "dirty" True))
+  (.clear (:records fvdb))
+  (.reset (:vectors fvdb))
+  (assoc fvdb "dirty" True))
   
 ;; * Functions to modify the vector databases (add, delete)
 ;; -----------------------------------------------------------------------------
 
-(defn info [#^ dict vdb]
+(defn info [#^ dict fvdb]
   "Some statistics on the vector db."
-  (let [recs (:records vdb)
-        vecs (:vectors vdb)]
+  (let [recs (:records fvdb)
+        vecs (:vectors fvdb)]
     {"records" (len recs)
      "embeddings" vecs.ntotal
      "embedding_dimension" vecs.d
      "is_trained" vecs.is-trained
-     "path" (:path vdb)
-     "sources" (len (sources vdb))
-     "embedding_model" (:model vdb)}))
+     "path" (:path fvdb)
+     "sources" (len (sources fvdb))
+     "embedding_model" (:model fvdb)}))
   
-(defn sources [#^ dict vdb]
-  "The set of sources in the vdb."
-  (sfor r (:records vdb) (:source r)))
+(defn sources [#^ dict fvdb]
+  "The set of sources in the fvdb."
+  (sfor r (:records fvdb) (:source r)))
 
-(defn validate [#^ dict vdb]
+(defn validate [#^ dict fvdb]
   "Check that there are the same number of records."
   ;; TODO data integrity:
   ;;      compare embeddings / cosine similarity of each element?
-  (let [recs (:records vdb)
-        vecs (:vectors vdb)]
+  (let [recs (:records fvdb)
+        vecs (:vectors fvdb)]
     (assert (= (len recs) vecs.ntotal))))
   
-(defmethod ingest [#^ dict vdb #^ (| (of list dict) Generator chain) docs]
+(defmethod ingest [#^ dict fvdb #^ (| (of list dict) Generator chain) docs]
   "Ingest a list of (document) dicts into the vector db.
   Expects for each dict at least:
     `{extract embedding hash-id #** metadata}`
@@ -136,62 +136,62 @@ thread. Other threads will have to reload the state after modification.
                       :if (not (:error d None))
                       (:hash d) d)
         ;; Only insert records that aren't already in the db.
-        ;; The new hashes are all hashes (the keys) less the ones already in the vdb.
-        vdb-hashes (sfor record (:records vdb) (:hash record))
-        new-hashes (list (.difference (set (.keys records-map)) vdb-hashes))
+        ;; The new hashes are all hashes (the keys) less the ones already in the fvdb.
+        fvdb-hashes (sfor record (:records fvdb) (:hash record))
+        new-hashes (list (.difference (set (.keys records-map)) fvdb-hashes))
         ;; The new records contain the embeddings associated with those new hashes.
         ;; Pop them, because we don't want them in the metadata.
         new-embeddings (lfor h new-hashes (.pop (get records-map h) "embedding"))
         new-records (lfor h new-hashes (get records-map h))]
     ;; we are now ready to add
     (when new-hashes
-      (let [findex (:vectors vdb)
-            records (:records vdb)
+      (let [findex (:vectors fvdb)
+            records (:records fvdb)
             vs (numpy.array new-embeddings :dtype numpy.float32)]
         ;; Add (in-place) the new embeddings (n x dim) to the vector index
         (normalize-L2 vs) ; works in-place
         (findex.add vs) ; works in-place
         ;; Add (in-place) the new records to the records list
         (records.extend new-records)
-        ;; Add the new records to the chunk index and return the new vdb.
+        ;; Add the new records to the chunk index and return the new fvdb.
         ;; Remember to write to disk!
-        (assoc vdb "dirty" True)))
+        (assoc fvdb "dirty" True)))
     ;; Return (a copy of) the subset, if any, that was added as a doc
     {"n_records_added" (len new-records)}))
 
-(defmethod ingest [#^ dict vdb #^ str fname-or-directory]
+(defmethod ingest [#^ dict fvdb #^ str fname-or-directory]
   "Ingests a file, or files under a directory."
-  (ingest vdb (split fname-or-directory)))
+  (ingest fvdb (split fname-or-directory)))
 
-(defn ingest-markdown [#^ dict vdb #^ str markdown-text * [source-type "text"] [source "anon"]] 
+(defn ingest-markdown [#^ dict fvdb #^ str markdown-text * [source-type "text"] [source "anon"]] 
   "Ingest markdown text. Can be composed with various sources."
   (let [chunks (chunk-markdown markdown-text)]
-    (ingest-doc vdb {"type" source-type
-                     "source" source
-                     "added" (sources.now)
-                     "chunks" chunks
-                     "embeddings" (embed chunks)})))
+    (ingest-doc fvdb {"type" source-type
+                      "source" source
+                      "added" (sources.now)
+                      "chunks" chunks
+                      "embeddings" (embed chunks)})))
 
-(defn ingest-chat [#^ dict vdb #^ (of list dict) chat-history]
-  "Add a chat history to the vdb."
+(defn ingest-chat [#^ dict fvdb #^ (of list dict) chat-history]
+  "Add a chat history to the fvdb."
   (raise NotImplementedError))
 
-(defn remove-source [#^ dict vdb #^ str source]
+(defn remove-source [#^ dict fvdb #^ str source]
   "Remove all entries that match a source.
   This function modifies the vector index in-place."
-  (let [records (:records vdb)
-        vectors (:vectors vdb)
+  (let [records (:records fvdb)
+        vectors (:vectors fvdb)
         ixs (gfor [ix record] (enumerate records)
                   :if (= source (:source record))
                   ix)]
         ;; FIXME  this index doesn't implement delete!!
         ;;        so we are overwriting the whole index.
-    (assoc vdb
+    (assoc fvdb
            "vectors" (.delete vectors (numpy.fromiter ixs :dtype numpy.int64))
            "records" (lfor record records
                            :if (!= source (:source record))
                            record)
-           "path" (:path vdb)
+           "path" (:path fvdb)
            "dirty" True)))
 
 ;; * Search
@@ -203,16 +203,16 @@ thread. Other threads will have to reload the state after modification.
       (numpy.array [(embed queries)] :dtype numpy.float32)
       (numpy.array (embed queries) :dtype numpy.float32)))
   
-(defmethod similar [#^ dict vdb #^ str query #** kwargs]
+(defmethod similar [#^ dict fvdb #^ str query #** kwargs]
   "Similarity search on query or list of queries.
   Returns list of results."
-  (first (similar vdb [query] #** kwargs)))
+  (first (similar fvdb [query] #** kwargs)))
 
-(defmethod similar [#^ dict vdb #^ (of list str) queries * [top 6]]
+(defmethod similar [#^ dict fvdb #^ (of list str) queries * [top 6]]
   "Similarity search on list of queries.
   Returns list of lists of results (one list per query)."
-  (let [v-index (:vectors vdb)
-        records (:records vdb)
+  (let [v-index (:vectors fvdb)
+        records (:records fvdb)
         [scores ixs] (.search v-index (_prepare-queries queries) top)]
     (lfor [kth-scores kth-ixs] (zip scores ixs)
           (list
@@ -226,7 +226,7 @@ thread. Other threads will have to reload the state after modification.
 (defn _margin? [])
   ;; let score be cosine similarity to query then subtract out projection on preceding vectors
 
-(defn marginal [#^ dict vdb query [k 4]]
+(defn marginal [#^ dict fvdb query [k 4]]
   "Marginal relevance query.
   Each successive in in the lower-dimensional manifold of vectors where the
   components of the previous results are zero."
@@ -236,7 +236,7 @@ thread. Other threads will have to reload the state after modification.
   (raise NotImplementedError)
   (let [results []]
     (for [n (range k)]
-      (let [result (first (first (similar vdb query :results 1)))
+      (let [result (first (first (similar fvdb query :results 1)))
             e (:embedding result)]
             
         (.append results)))))

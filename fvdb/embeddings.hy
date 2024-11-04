@@ -28,10 +28,10 @@ model = \"all-mpnet-base-v2\"
 
 (require hyrule [unless ->])
 
-(import vdb.config)
+(import fvdb.config)
 
 
-(setv embedding-model-options (:embeddings vdb.config.cfg))
+(setv embedding-model-options (:embeddings fvdb.config.cfg))
 (setv embedding-model-name (.pop embedding-model-options "model" "all-mpnet-base-v2"))
 
 (setv embedding-model None)

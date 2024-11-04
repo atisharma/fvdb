@@ -5,7 +5,7 @@ into chunks for processing.
 This module provides a collection of functions to divide text or files
 into searchable chunks (chunk-*). These may then be placed into
 a document data structure suitable for insertion into a vector
-database (see vdb.hy) for later retrieval.
+database (see fvdb.hy) for later retrieval.
 
 Multiple file types are supported, including text, HTML, markdown,
 JSON, and various programming languages. Functions are also available
@@ -49,7 +49,7 @@ text files. See unstructured, trafiltura, docling, etc.
 
 (import markdownify [markdownify])
 
-(import vdb.embeddings [max-length token-count embed])
+(import fvdb.embeddings [max-length token-count embed])
 
 
 ;; TODO : consider CLIP to encode images?
