@@ -17,9 +17,11 @@ below), a summary of the extract will be stored alongside the extract.
 - choice of sentence-transformer embeddings
 - useful formatting of results (json, tabulated...)
 - cli access
+- extract summaries
 
 Any input other than plain text (markdown, asciidoc, rst, source code etc.) is out of scope.
 You should one of the many available packages for that (unstructured, trafiltura, docling, etc.)
+to convert to plaintext in a separate step.
 
 
 ## Usage
@@ -30,7 +32,7 @@ from fvdb import faiss, ingest, similar, sources, write
 
 # data ingestion
 v = faiss()
-ingest(v, "docs.md")
+ingest(v, "doc.md")
 ingest(v, "docs-dir")
 write(v, "/tmp/test.fvdb") # defaults to $XDG_DATA_HOME/fvdb (~/.local/share/fvdb/ on Linux)
 
@@ -41,11 +43,11 @@ results = marginal(v, "some query text") # not yet implemented
 # information, management
 sources(v)
     { ...
-      'data-dir/Once More to the Lake.txt',
-      'data-dir/Politics and the English Language.txt',
-      'data-dir/Reflections on Gandhi.txt',
-      'data-dir/Shooting an elephant.txt',
-      'data-dir/The death of the moth.txt',
+      'docs-dir/Once More to the Lake.txt',
+      'docs-dir/Politics and the English Language.txt',
+      'docs-dir/Reflections on Gandhi.txt',
+      'docs-dir/Shooting an elephant.txt',
+      'docs-dir/The death of the moth.txt',
       ... }
 
 info(v)
@@ -73,27 +75,23 @@ $ fvdb ingest docs-dir
 $ # search
 $ fvdb similar -j "some query text" > results.json   # --json / -j gives json output
 
-$ fvdb similar "George Orwell's formative experience as a policeman in colonial Burma"
+$ fvdb similar -r 2 "George Orwell's formative experience as a policeman in colonial Burma"
     # defaults to tabulated output (not all fields will be shown)
-       score  source                              added                               page    length
-    --------  ----------------------------------- --------------------------------  ------  --------
-    0.789609  data-dir/The death of the moth.txt  2024-11-05T09:45:56.519617+00:00      15      5579
-    0.778847  data-dir/The death of the moth.txt  2024-11-05T09:45:51.922005+00:00       1      7887
-    0.771072  data-dir/90Vonnegut.txt             2024-11-05T09:45:48.797092+00:00       0      5382
-    0.71053   data-dir/The death of the moth.txt  2024-11-05T09:45:54.711510+00:00      10      8087
-    0.579925  data-dir/A hanging.txt              2024-11-05T09:45:49.916265+00:00       0      2582
-    0.526988  data-dir/Shooting an elephant.txt   2024-11-05T09:45:59.860741+00:00       0      3889
+       score  source                             added                               page    length
+    --------  ---------------------------------- --------------------------------  ------  --------
+    0.579925  docs-dir/A hanging.txt             2024-11-05T11:37:26.232773+00:00       0      2582
+    0.526988  docs-dir/Shooting an elephant.txt  2024-11-05T11:37:43.891659+00:00       0      3889
 
 $ fvdb marginal "some query text"                       # not yet implemented
 
 $ # information, management
 $ fvdb sources
     ...
-    /docs-dir/Once More to the Lake.txt
-    /docs-dir/Politics and the English Language.txt
-    /docs-dir/Reflections on Gandhi.txt
-    /docs-dir/Shooting an elephant.txt
-    /docs-dir/The death of the moth.txt
+    docs-dir/Once More to the Lake.txt
+    docs-dir/Politics and the English Language.txt
+    docs-dir/Reflections on Gandhi.txt
+    docs-dir/Shooting an elephant.txt
+    docs-dir/The death of the moth.txt
     ...
 
 $ fvdb info
