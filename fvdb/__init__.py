@@ -10,6 +10,6 @@ import fvdb.config
 from fvdb.db import faiss, ingest, similar, sources, marginal, info, nuke, write
 
 # set the package version
-__version__ = "0.0.2"
+__version__ = "0.1.1"
 __version_info__ = __version__.split(".")
 
