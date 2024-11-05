@@ -39,7 +39,8 @@ vector database.
   nuke [path]
   (import fvdb.db [faiss nuke])
   (let [v (faiss path)]
-    (nuke v)))
+    (nuke v)
+    (write v)))
 
 (cli.add-command nuke)
 
