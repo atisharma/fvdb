@@ -33,9 +33,10 @@ Apply `sumy` to generate an extractive summary.
     (try
       (return (PunktTokenizer language))
       (except [e (LookupError zipfile.BadZipfile)]
-        (raise (LookupError "NLTK tokenizers are missing or the language is not supported.\n"
-			    "Download them by following command: python -c \"import nltk; nltk.download('punkt_tab')\"\n"
-                	    "Original error was:\n" + str(e)))))))
+        (raise (LookupError
+                 "NLTK tokenizers are missing or the language is not supported.\n"
+                 "Download them by following command: python -c \"import nltk; nltk.download('punkt_tab')\"\n"
+                 (+ "Original error was:\n" (str e))))))))
 
 (defn extractive-summary [text]
   "Apply `sumy` to generate an extractive summary."

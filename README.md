@@ -6,6 +6,7 @@ It uses a L2 index with normalised vectors.
 It uses the `faiss-cpu` package and `sentence-transformers` for embeddings.
 If you need the GPU version of FAISS (very probably not), you can just manually
 install `faiss-gpu` and use `GPUIndexFlatL2` instead of `IndexFlatL2` in `fvdb/db.hy`.
+You can still use a GPU text embedding model even while using `faiss-cpu`.
 
 If summaries are enabled (**not** the default, see configuration section
 below), a summary of the extract will be stored alongside the extract.
@@ -140,7 +141,7 @@ embeddings.model = "all-mpnet-base-v2"
 
 First [install pytorch](https://pytorch.org/get-started/locally/), which is used by `sentence-transformers`.
 You must decide if you want the CPU or CUDA (nvidia GPU) version of pytorch.
-For just text embeddings for `fvdb`, CPU is sufficient.
+For just text embeddings for `fvdb`, CPU is sufficient, with the default model.
 
 Then,
 ```bash
