@@ -49,10 +49,17 @@ text files. See unstructured, trafiltura, docling, etc.
 
 (import markdownify [markdownify])
 
+(import fvdb.config)
 (import fvdb.embeddings [max-length token-count embed])
 
 
 ;; TODO : consider CLIP to encode images?
+
+
+;; Conditional import
+(setv summary (:summary fvdb.config.cfg False))
+(when summary
+  (import fvdb.summaries [extractive-summary]))
 
 
 ;; * High-level convenience functions
@@ -149,13 +156,16 @@ text files. See unstructured, trafiltura, docling, etc.
 
 (defn split-file [fname]
   "Split according to file type (with error handling).
-  Return generator of dicts (documents) with the extract, its embedding and metadata."
+  Return generator of dicts (documents) with the extract, its embedding,
+  a summary, and metadata."
   (let [ft (filetype fname)]
     (try
       (gfor [p c] (enumerate (_chunk-by-filetype (slurp fname) ft))
           {#** ft
            "added" (now)
            "extract" c
+           "summary" (when summary
+                       (extractive-summary c))
            "page" p
            "embedding" (embed c)
            "hash" (hash-id c)

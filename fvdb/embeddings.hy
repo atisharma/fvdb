@@ -31,8 +31,9 @@ model = \"all-mpnet-base-v2\"
 (import fvdb.config)
 
 
-(setv embedding-model-options (:embeddings fvdb.config.cfg))
-(setv embedding-model-name (.pop embedding-model-options "model" "all-mpnet-base-v2"))
+(setv default-model "all-mpnet-base-v2")
+(setv embedding-model-options (:embeddings fvdb.config.cfg {"model" default-model}))
+(setv embedding-model-name (.pop embedding-model-options "model" default-model))
 
 (setv embedding-model None)
 (setv tokenizer None)
