@@ -37,7 +37,7 @@ vector database.
 (defn [(click.command)
        (click.option "-p" "--path" :default default-path :help "Specify a fvdb path.")]
   nuke [path]
-  (import fvdb.db [faiss nuke])
+  (import fvdb.db [faiss nuke write])
   (let [v (faiss path)]
     (nuke v)
     (write v)))
