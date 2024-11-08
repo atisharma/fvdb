@@ -11,6 +11,8 @@ You can still use a GPU text embedding model even while using `faiss-cpu`.
 If summaries are enabled (**not** the default, see configuration section
 below), a summary of the extract will be stored alongside the extract.
 
+It matches well with [trag](https://github.com/atisharma/trag).
+
 
 ## Features
 

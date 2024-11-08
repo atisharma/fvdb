@@ -42,7 +42,7 @@ thread. Other threads will have to reload the state after modification.
 (import faiss [IndexFlatL2 IndexFlatIP read-index write-index normalize-L2])
 
 (import fvdb.config [cfg])
-(import fvdb.embeddings [embed embedding-model-name])
+(import fvdb.embeddings [embed embedding-model-name max-length])
 (import fvdb.split [split chunk-markdown])
 
 
@@ -107,6 +107,7 @@ thread. Other threads will have to reload the state after modification.
     {"records" (len recs)
      "embeddings" vecs.ntotal
      "embedding_dimension" vecs.d
+     "max_length" (max-length)
      "is_trained" vecs.is-trained
      "path" (:path fvdb)
      "sources" (len (sources fvdb))

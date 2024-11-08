@@ -41,6 +41,11 @@ model = \"all-mpnet-base-v2\"
 ;; * Functions dealing with embeddings for the vector databases
 ;; -----------------------------------------------------------------------------
 
+(defn force-import []
+  "It is large, so you might want to control when you import."
+  (_import-embedding-model)
+  (_import-tokenizer))
+
 (defn _import-embedding-model []
   "It is large, so delay import until needed."
   (global embedding-model)
