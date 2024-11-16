@@ -4,6 +4,7 @@ Apply `sumy` to generate an extractive summary.
 
 (require hyrule [of -> ->>])
 
+(import numpy)
 (import nltk)
 (import nltk.tokenize [PunktTokenizer])
 (import sumy.parsers.plaintext [PlaintextParser])
@@ -40,9 +41,11 @@ Apply `sumy` to generate an extractive summary.
 
 (defn extractive-summary [text]
   "Apply `sumy` to generate an extractive summary."
-  (let [parser (PlaintextParser.from-string text (FixedTokenizer language))
-        stemmer (Stemmer language)
-        summarizer (Summarizer stemmer)]
-    (setv summarizer.stop_words (get-stop-words language))
-    (.join " " (map str (summarizer parser.document summary-sentences)))))
-
+  (try
+    (let [parser (PlaintextParser.from-string text (FixedTokenizer language))
+          stemmer (Stemmer language)
+          summarizer (Summarizer stemmer)]
+      (setv summarizer.stop_words (get-stop-words language))
+      (.join " " (map str (summarizer parser.document summary-sentences))))
+    (except [e [numpy.linalg.LinAlgError]]
+      "Error: Summarization failed.")))

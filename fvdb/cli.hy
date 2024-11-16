@@ -58,13 +58,14 @@ vector database.
   
 (defn [(click.command)
        (click.option "-p" "--path" :default default-path :help "Specify a fvdb path.")
-       (click.argument "file_or_directory")]
-  ingest [path file-or-directory]
+       (click.argument "files_or_directories" :nargs -1)]
+  ingest [path files-or-directories]
   (import fvdb.db [faiss ingest write])
-  (let [v (faiss path)
-        records (ingest v file-or-directory)
-        n-records (:n-records-added records)]
-    (click.echo f"Adding {n_records} records")
+  (let [v (faiss path)]
+    (for [file-or-directory files-or-directories]
+      (let [records (ingest v file-or-directory)
+            n-records (:n-records-added records)]
+        (click.echo f"Adding {n_records} records from {file_or_directory}")))
     (write v)))
   
 (cli.add-command ingest)

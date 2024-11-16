@@ -22,8 +22,8 @@ It matches well with [trag](https://github.com/atisharma/trag).
 - cli access
 - extract summaries
 
-Any input other than plain text (markdown, asciidoc, rst, source code etc.) is out of scope.
-You should one of the many available packages for that (unstructured, trafiltura, docling, etc.)
+Any input other than plain text (markdown, asciidoc, rst, source code etc.) is **out of scope**.
+You should one of the many available packages (unstructured, trafiltura, docling, etc.)
 to convert to plaintext in a separate step.
 
 
