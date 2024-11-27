@@ -4,7 +4,7 @@ from pathlib import Path
 from platformdirs import user_state_path, user_config_path
 
 
-cfg = {"embeddings.model": "all_mpnet_base_v2",
+cfg = {"embeddings.model": "sentence-transformers/all-mpnet-base-v2",
        "path": Path(user_state_path("fvdb"), "default.vdb")}
 
 try:
